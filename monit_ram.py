@@ -48,7 +48,7 @@ def main():
 
         except KeyboardInterrupt:
             print("\n [*] saving measurements...\n")
-            ff.save_measure(pa.fname_out, start, t, mem_used2, mem_used)
+            ff.save_measure(pa.fname_out, start, None, t, mem_used2, mem_used)
             print('\n [+] success on saving:\n %s\n'%pa.fname_out)
             break
 
