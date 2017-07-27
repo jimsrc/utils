@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import psutil, time
-import argparse, sys
+import argparse, sys, re
 import numpy as np
 from datetime import datetime, timedelta
 from subprocess import Popen, PIPE, STDOUT
@@ -13,23 +13,28 @@ def look_for_process(pname):
     p = Popen(CMD, stdin=PIPE, stdout=PIPE, stderr=STDOUT, 
         bufsize=1, shell=True)
     out_, _ = p.communicate()
+    del p
     # [:-1] is because the last one is an empty string ''
     out = out_.split('\n')[:-1]
 
+    print(' +++++++++++++++++++++++++++++++++++++++++++')
+    print(' [*] List of processes that match \''+pname+'\':\n')
     _pid, _cmd = [], []
+    pattern = re.compile('.*monit_process.py .*')
     # get a 2D array
-    #for _o in out:
     for i in range(len(out)):
         _o   = out[i]
         _pid += [ _o.split()[0] ]
         _cmd += [ _o.replace(_pid[-1]+' ', '') ]
         print " [*] " + _cmd[-1]
         if _cmd[-1].startswith('/bin/sh -c ') or \
-                _cmd[-1].startswith('grep '+pname):
+                _cmd[-1].startswith('grep '+pname) or \
+                pattern.match(_cmd[-1]):
             print "     [+] removing..."
             # reject this process, because it refers to me
             _pid.pop(-1); _cmd.pop(-1)
 
+    print(' +++++++++++++++++++++++++++++++++++++++++++\n')
     if len(_pid)==0:
         return None, None, None
     else:
@@ -57,17 +62,15 @@ def save_measure(fname, start, header, t, *data):
     buff = build_measure_array(t, *data)
     timestmp = utc2date(start).strftime('%d %b %Y %H:%M:%S')
 
-    # header
-    if header is None:
-        HEADER = """
-        Memory consumption measurements.
-        Measurement started at {timestmp} (UTC)
-        """.format(timestmp=timestmp)
-    else:
-        HEADER = header
+    #--- header
+    HEADER = """
+    Memory consumption measurements.
+    Measurement started at {timestmp} (UTC)
+    """.format(timestmp=timestmp)
+    if header is not None:
+        HEADER += '\n'+header
 
-    print "\n [*] buff.dtype :", type(buff), '\n'
-    print " [*] output shape: ", buff.shape
+    print " [*] output-array shape: ", buff.shape
     np.savetxt(fname, X=buff, fmt='%g', header=HEADER)
 
 

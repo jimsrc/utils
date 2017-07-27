@@ -46,7 +46,7 @@ NotFound = 1
 while True:
     # look for target process...
     if NotFound:
-        time.sleep(1)
+        time.sleep(0.3)
         # these are the PID numbers for the processes described by 
         # the pattern `proc_name`; except for those that match with 
         # this very same process (i.e. the childrens of this script):
@@ -54,6 +54,7 @@ while True:
         NotFound = 1 if PIDs is None else 0
         continue
     else:
+        print('\n [+] monitoring these PID(s):\n     ', PIDs)
         break
 
 # initialize data arrays for each of the processes
@@ -73,13 +74,19 @@ while True:
             memdata[_pid][RES]  += [ pinfo.memory_info()[0] ] # resident
             memdata[_pid][VIRT] += [ pinfo.memory_info()[1] ] # virtual
             memdata[_pid][SHR]  += [ pinfo.memory_info()[2] ] # shared
-            ndata               += 1
+        # nmbr of **successful** measurements
+        ndata               += 1
 
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, psutil.NoSuchProcess):
         if len(t)==0:
             print("\n [-] No measurements made!\n")
 
         else:
+            # truncate to a valid length
+            t                   = t[:ndata]
+            memdata[_pid][RES]  = memdata[_pid][RES][:ndata]
+            memdata[_pid][VIRT] = memdata[_pid][VIRT][:ndata]
+            memdata[_pid][SHR]  = memdata[_pid][SHR][:ndata]
             # build header (reporting the PID numbers for the columns of data)
             header = '\n time'
             for _pid in PIDs:
