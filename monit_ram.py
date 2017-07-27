@@ -60,6 +60,7 @@ def main():
     mem_tot = psutil.virtual_memory()[0] # [bytes]
 
     start = time.time() # mediante argparse, cambiarle el valor inicial
+    print('\n [*] Starting measurement at ' + utc2date(start).strftime('%d %b %Y %H:%M:%S') + ' (UTC) \n')
     #while measure(start, time.time()):
     while True:
         try:
@@ -68,9 +69,9 @@ def main():
             sys.stdout.write('> measure %d' % len(t) + '\r')
             sys.stdout.flush()
             t         += [ time.time() - start ] # [sec]
-            mem_avail  = psutil.virtual_memory()[1] # [bytes]
-            mem_used2 += [ mem_tot - mem_avail ]    # [bytes]
-            mem_used  += [ psutil.virtual_memory()[3] ] # [bytes]
+            mem_avail  = psutil.virtual_memory()[1]/(1024.*1024.) # [MB]
+            mem_used2 += [ (mem_tot-mem_avail)/(1024.*1024.) ]    # [MB]
+            mem_used  += [ psutil.virtual_memory()[3]/(1024.*1024.) ] # [MB]
 
         except KeyboardInterrupt:
             print("\n [*] saving measurements...\n")
