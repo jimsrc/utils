@@ -18,7 +18,9 @@ def look_for_process(pname):
     out = out_.split('\n')[:-1]
 
     print(' +++++++++++++++++++++++++++++++++++++++++++')
-    print(' [*] List of processes that match \''+pname+'\':\n')
+    _strtime = utc2date(time.time()).strftime('%d %b %Y %H:%M:%S')
+    print(' [*] List of processes that match \''+pname+'\' \n     ({:s}):\n'.format(
+        _strtime))
     _pid, _cmd = [], []
     pattern = re.compile('.*monit_process.py .*')
     # get a 2D array
