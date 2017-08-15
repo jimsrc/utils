@@ -3,6 +3,7 @@
 import psutil, time
 import argparse, sys
 import numpy as np
+from numpy import array
 from datetime import datetime, timedelta
 import funcs as ff
 
@@ -30,8 +31,9 @@ help='pattern for the process command we seek for',
 pa = parser.parse_args()
 
 
-t = []
-mem_tot = psutil.virtual_memory()[0] # [bytes] RAM capacity
+t           = []
+mem_used    = []
+mem_tot     = psutil.virtual_memory()[0] # [bytes] RAM capacity
 
 start = time.time() # mediante argparse, cambiarle el valor inicial
 print('\n [*] Starting measurement at ' + ff.utc2date(start).strftime('%d %b %Y %H:%M:%S') + ' (UTC) \n')
@@ -68,7 +70,9 @@ while True:
         time.sleep(1)
         #sys.stdout.write('> measure %d' % len(t) + '\r')
         #sys.stdout.flush()
-        t         += [ time.time() - start ] # [sec]
+        t          += [ time.time() - start ] # [sec]
+        mem_avail   = psutil.virtual_memory()[1]        # [B]
+        mem_used   += [ (mem_tot - mem_avail) ]         # [B]
         for _pid in PIDs:
             pinfo               = psutil.Process(pid=int(_pid))
             res, virt, shr      = pinfo.memory_info()[:3]
@@ -91,22 +95,24 @@ while True:
 
         else:
             # truncate to a valid length
-            t                   = t[:ndata]
+            t           = t[:ndata]                                         # [sec]
+            mem_used    = array(mem_used[:ndata])/(2.**20)               # [MB]
             for _pid in PIDs:
-                memdata[_pid][RES]  = memdata[_pid][RES][:ndata]
-                memdata[_pid][VIRT] = memdata[_pid][VIRT][:ndata]
-                memdata[_pid][SHR]  = memdata[_pid][SHR][:ndata]
+                memdata[_pid][RES]  = array(memdata[_pid][RES][:ndata])/(2.**20)   # [MB]
+                memdata[_pid][VIRT] = array(memdata[_pid][VIRT][:ndata])/(2.**20)  # [MB]
+                memdata[_pid][SHR]  = array(memdata[_pid][SHR][:ndata])/(2.**20)   # [MB]
 
             # build header (reporting the PID numbers for the columns of data)
             header =  '\n For each PID, three columns of memory usage:'
             header += '\n Virtual (VIRT), Shared (SHR), and Resident (RES)\n'
-            header += '\n time [sec]'
+            header += '\n time [sec], total RAM used [MB]'
             for _pid in PIDs:
                 header += ', ' + _pid
             header += '\n'
 
             print " [*] we captured %d processes" % len(memdata.keys())
             buff = []  # to save in ASCII
+            buff += [ mem_used ]    # 2nd column (time is 1st column)
             for _pid in memdata.keys():
                 for _dnm in [VIRT, SHR, RES]:
                     buff += [ memdata[_pid][_dnm] ]
