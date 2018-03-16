@@ -56,7 +56,7 @@ while True:
         NotFound = 1 if PIDs is None else 0
         continue
     else:
-        print('\n [+] monitoring these PID(s):\n     ', PIDs)
+        print '\n [+] monitoring these PID(s):\n     ', PIDs
         break
 
 # initialize data arrays for each of the processes
@@ -68,8 +68,6 @@ ndata = 0
 while True:
     try:
         time.sleep(1)
-        #sys.stdout.write('> measure %d' % len(t) + '\r')
-        #sys.stdout.flush()
         t          += [ time.time() - start ] # [sec]
         mem_avail   = psutil.virtual_memory()[1]        # [B]
         mem_used   += [ (mem_tot - mem_avail) ]         # [B]
@@ -81,8 +79,8 @@ while True:
             memdata[_pid][SHR]  += [ shr  ] # shared
 
             # report on screen
-            _report = '> measure #%d;  RES: %g,  VIRT: %g,  SHR: %g'%(\
-                    len(t), res/(2.**20), virt/(2.**20), shr/(2.**20))
+            _report = '> measure #%d (PID:%s); RES:%g, VIRT:%g, SHR:%g, TOT:%g'%(\
+            len(t), _pid, res/(2.**20), virt/(2.**20), shr/(2.**20), mem_used[-1]/(2.**20))
             sys.stdout.write(_report + '\r')
             sys.stdout.flush()
 
@@ -90,13 +88,16 @@ while True:
         ndata               += 1
 
     except (KeyboardInterrupt, psutil.NoSuchProcess):
+        # stop measuring either if:
+        # - we press Ctrl+C, or
+        # - processes terminate
         if len(t)==0:
             print("\n [-] No measurements made!\n")
 
         else:
             # truncate to a valid length
-            t           = t[:ndata]                                         # [sec]
-            mem_used    = array(mem_used[:ndata])/(2.**20)               # [MB]
+            t           = t[:ndata]                                 # [sec]
+            mem_used    = array(mem_used[:ndata])/(2.**20)          # [MB]
             for _pid in PIDs:
                 memdata[_pid][RES]  = array(memdata[_pid][RES][:ndata])/(2.**20)   # [MB]
                 memdata[_pid][VIRT] = array(memdata[_pid][VIRT][:ndata])/(2.**20)  # [MB]
