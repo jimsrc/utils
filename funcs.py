@@ -26,12 +26,20 @@ def look_for_process(pname):
     # get a 2D array
     for i in range(len(out)):
         _o   = out[i]
-        _pid += [ _o.split()[0] ]
-        _cmd += [ _o.replace(_pid[-1]+' ', '') ]
-        print " [*] " + _cmd[-1]
+        _pid += [ _o.split()[0] ]                   # 1st column is PID
+        _cmd += [ _o.replace(_pid[-1]+' ', '') ]    # from 2nd to the last column is the full command
+        # report the PID and the full command
+        print " [*] %05d  %s" % (int(_pid[-1]), _cmd[-1])
+
+        # The conditions below are:
+        # 1) the command 'CMD' itself
+        # 2) the grep command executed by this 'CMD' command
+        # 3) the command 'CMD' itself, again
+        # 4) editing the 'pattern' file ()
         if _cmd[-1].startswith('/bin/sh -c ') or \
                 _cmd[-1].startswith('grep '+pname) or \
-                pattern.match(_cmd[-1]):
+                pattern.match(_cmd[-1]) or \
+                _cmd[-1].startswith('vim '):                # editing the 'pattern' file ()
             print "     [+] removing..."
             # reject this process, because it refers to me
             _pid.pop(-1); _cmd.pop(-1)
