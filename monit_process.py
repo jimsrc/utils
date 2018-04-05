@@ -25,7 +25,7 @@ help='output filename.',
 parser.add_argument(
 '-pn', '--proc_name',
 type=str,
-default='SWMF.exe',
+default='BINARY.exe',
 help='pattern for the process command we seek for',
 )
 pa = parser.parse_args()
