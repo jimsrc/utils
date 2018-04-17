@@ -24,5 +24,12 @@ The monitoring process dies either when the process finishes or when its killed 
                             pattern for the process command we seek for (default:
                             BINARY.exe)
 
+---
+## Physical quantities
+
+Some handy functions in [phys.py](./phys.py).
+See:
+
+    ./calc_beta.py -Ek 1e9
 
 <!--- EOF -->
