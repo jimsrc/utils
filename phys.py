@@ -38,4 +38,14 @@ def calc_beta_relativist(Ek):
     beta     = np.sqrt(1. - 1./(gamma*gamma))
     return beta
 
+def K2mfp(Kdiff, Ek):
+    """
+    convert spatial diffusion coeff to mean-free-path
+    Kdiff       : [cm^2/s] spatial diffusion coeff
+    """
+    v   = c * calc_beta_relativist(Ek) # [cm/s]
+    mfp = (3./v) * Kdiff        # [cm]
+    mfp_in_AU = mfp / AU_in_cm  # [AU]
+    return mfp_in_AU
+
 #EOF
