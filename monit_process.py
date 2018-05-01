@@ -28,6 +28,12 @@ type=str,
 default='BINARY.exe',
 help='pattern for the process command we seek for',
 )
+parser.add_argument(
+'-pid', '--pid',
+type=int,
+default=None,
+help='PID of the process',
+)
 pa = parser.parse_args()
 
 
@@ -44,7 +50,12 @@ VIRT    = 0
 SHR     = 1
 RES     = 2
 
-NotFound = 1
+if pa.pid is not None:
+    PIDs = [str(pa.pid),]
+    NotFound = 0
+else:
+    NotFound = 1
+
 while True:
     # look for target process...
     if NotFound:
