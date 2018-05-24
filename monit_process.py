@@ -34,8 +34,14 @@ type=int,
 default=None,
 help='PID of the process',
 )
+parser.add_argument(
+'-q', '--quiet',
+action='store_true',
+help='Don\'t show a "live" report while measuring. This \
+is useful when running in background or piping the STDOUT \
+to a file.',
+)
 pa = parser.parse_args()
-
 
 t           = []
 mem_used    = []
@@ -92,8 +98,9 @@ while True:
             # report on screen
             _report = '> measure #%d (PID:%s); RES:%g, VIRT:%g, SHR:%g, TOT:%g'%(\
             len(t), _pid, res/(2.**20), virt/(2.**20), shr/(2.**20), mem_used[-1]/(2.**20))
-            sys.stdout.write(_report + '\r')
-            sys.stdout.flush()
+            if not(pa.quiet):
+                sys.stdout.write(_report + '\r')
+                sys.stdout.flush()
 
         # nmbr of **successful** measurements
         ndata               += 1
